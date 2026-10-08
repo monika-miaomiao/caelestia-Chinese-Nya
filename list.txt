@@ -1,0 +1,6 @@
+caelestia|萌猫语配置本体|🐾
+install|安装脚本 install.sh|🛠️
+uninstall|卸载与回退 uninstall.sh|↩️
+quick-restore|快速恢复脚本|⚡
+tui|TUI 图形安装器|🐱
+release|Release 与打包发布|📦
