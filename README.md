@@ -87,6 +87,16 @@ mkdir -p ~/.config/quickshell
 cp -r caelestia-Chinese-Nya/caelestia ~/.config/quickshell/
 ```
 
+### 方式三：TUI 图形终端安装器（推荐萌新）
+
+```bash
+git clone https://github.com/monika-miaomiao/caelestia-Chinese-Nya
+cd caelestia-Chinese-Nya
+python3 tui.py
+```
+
+零依赖（仅需 Python 3 + curses）的精美 TUI：方向键选择、Enter 确认，集成安装 / 卸载回退 / 联网快速恢复 / 状态查看。
+
 ### 使配置生效
 
 ```bash
