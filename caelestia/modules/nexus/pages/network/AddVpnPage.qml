@@ -1,0 +1,227 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+import Caelestia.Components
+import Caelestia.Config
+import Caelestia.I18n
+import qs.components
+import qs.components.controls
+import qs.services
+import qs.modules.nexus.common
+
+// Add or edit a VPN provider. editingVpnIndex (-1 = add) is read from NexusState.
+PageBase {
+    id: root
+
+    readonly property int editIndex: nState.editingVpnIndex
+    readonly property bool editing: editIndex >= 0
+    readonly property var existing: editing ? (VPN.providers[editIndex] ?? null) : null
+
+    function splitCmd(arr: var): string {
+        return arr?.join(" ") ?? "";
+    }
+
+    function joinCmd(str: string): var {
+        const t = str.trim();
+        return t.length > 0 ? t.split(/\s+/) : [];
+    }
+
+    function arrEq(a: var, b: var): bool {
+        return a.length === b.length && a.every((x, i) => x === b[i]);
+    }
+
+    function submit(): void {
+        const name = nameField.text.trim();
+        if (name.length === 0) {
+            nameField.isError = true;
+            nameField.forceActiveFocus();
+            return;
+        }
+
+        const data = {
+            name: name,
+            displayName: displayField.text.trim() || name,
+            interface: interfaceField.text.trim(),
+            connectCmd: joinCmd(connectField.text),
+            disconnectCmd: joinCmd(disconnectField.text)
+        };
+
+        if (editing) {
+            const needsReload = existing.id === VPN.selectedProvider && VPN.connected && (existing.name !== name || existing.interface !== data.interface || !arrEq(existing.connectCmd, data.connectCmd) || !arrEq(existing.disconnectCmd, data.disconnectCmd));
+            if (needsReload)
+                VPN.disconnect();
+            VPN.updateProvider(editIndex, data);
+            if (needsReload) {
+                if (!VPN.connecting && !VPN.disconnecting) {
+                    VPN.connect();
+                } else if (VPN.disconnecting) {
+                    let onConnChanged = () => {
+                        if (onConnChanged && !VPN.disconnecting) {
+                            VPN.disconnectingChanged.disconnect(onConnChanged);
+                            onConnChanged = null;
+                            if (!VPN.connected)
+                                VPN.connect();
+                        }
+                    };
+                    VPN.disconnectingChanged.connect(onConnChanged);
+                }
+            }
+        } else {
+            VPN.addProvider(data);
+        }
+
+        nState.closeSubPage();
+    }
+
+    title: editing ? Tr.tr("编辑 VPN 提供商喵") : Tr.tr("添加 VPN 提供商喵")
+    isSubPage: true
+
+    Component.onCompleted: {
+        if (existing) {
+            nameField.text = existing.name;
+            displayField.text = existing.displayName;
+            interfaceField.text = existing.interface;
+            connectField.text = splitCmd(existing.connectCmd);
+            disconnectField.text = splitCmd(existing.disconnectCmd);
+        }
+    }
+
+    ColumnLayout {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        width: root.cappedWidth
+        spacing: Tokens.spacing.large
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.leftMargin: Tokens.padding.small
+            // TRANSLATORS: the four names in brackets are provider identifiers, leave them untranslated
+            text: Tr.tr("内置名称（wireguard、warp、tailscale、netbird）会自动填充其命令。对于其他名称，请提供连接/断开命令喵")
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.body.small
+            wrapMode: Text.WordWrap
+        }
+
+        StyledTextField {
+            id: nameField
+
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.spacing.small
+            placeholderText: Tr.tr("提供商名称喵")
+            leadingIcon: "vpn_key"
+            // TRANSLATORS: id here means the provider identifier, e.g. wireguard
+            supportingText: Tr.tr("内置 ID 或自定义名称喵")
+            errorText: Tr.tr("提供商名称为必填项喵")
+            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+            onAccepted: displayField.forceActiveFocus()
+        }
+
+        StyledTextField {
+            id: displayField
+
+            Layout.fillWidth: true
+            placeholderText: Tr.tr("显示名称喵")
+            // TRANSLATORS: the name shown in the VPN provider list on the network page
+            supportingText: Tr.tr("显示在列表中喵")
+            leadingIcon: "label"
+            inputMethodHints: Qt.ImhNoPredictiveText
+
+            onAccepted: interfaceField.forceActiveFocus()
+        }
+
+        StyledTextField {
+            id: interfaceField
+
+            Layout.fillWidth: true
+            placeholderText: Tr.trCtx("接口喵", "network interface")
+            leadingIcon: "lan"
+            supportingText: Tr.tr("网络接口（用于 WireGuard/状态检查）喵")
+            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+            onAccepted: connectField.forceActiveFocus()
+        }
+
+        SectionHeader {
+            text: Tr.tr("自定义命令（可选）喵")
+        }
+
+        StyledTextField {
+            id: connectField
+
+            Layout.fillWidth: true
+            placeholderText: Tr.tr("连接命令喵")
+            leadingIcon: "play_arrow"
+            supportingText: Tr.tr("留空则使用内置默认值喵")
+            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+            onAccepted: disconnectField.forceActiveFocus()
+        }
+
+        StyledTextField {
+            id: disconnectField
+
+            Layout.fillWidth: true
+            placeholderText: Tr.tr("断开命令喵")
+            leadingIcon: "stop"
+            supportingText: Tr.tr("留空则使用内置默认值喵")
+            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+            onAccepted: root.submit()
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: (root.editing ? Tokens.spacing.medium : Tokens.spacing.extraSmall) - parent.spacing
+            spacing: Tokens.spacing.small
+
+            IconTextButton {
+                visible: root.editing
+                isRound: true
+                horizontalPadding: Tokens.padding.extraLarge
+                verticalPadding: Tokens.padding.medium
+                inactiveColour: Colours.palette.m3errorContainer
+                inactiveOnColour: Colours.palette.m3onErrorContainer
+                iconLabel.fill: 1
+                iconLabel.grade: 25
+                icon: "delete_forever"
+                text: Tr.tr("删除喵")
+                onClicked: {
+                    if (root.existing.id === VPN.selectedProvider && VPN.connected)
+                        VPN.disconnect();
+                    VPN.deleteProvider(root.editIndex);
+                    root.nState.closeSubPage();
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            ButtonRow {
+                spacing: parent.spacing
+
+                TextButton {
+                    isRound: true
+                    shapeMorph: true
+                    horizontalPadding: Tokens.padding.extraLarge
+                    verticalPadding: Tokens.padding.medium
+                    type: TextButton.Tonal
+                    text: Tr.trCtx("取消喵", "button")
+                    onClicked: root.nState.closeSubPage()
+                }
+
+                TextButton {
+                    isRound: true
+                    shapeMorph: true
+                    horizontalPadding: Tokens.padding.extraLarge
+                    verticalPadding: Tokens.padding.medium
+                    text: root.editing ? Tr.trCtx("保存喵", "button") : Tr.trCtx("添加喵", "button")
+                    disabled: !nameField.text.trim()
+                    onClicked: root.submit()
+                }
+            }
+        }
+    }
+}
