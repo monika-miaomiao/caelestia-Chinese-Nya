@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caelestia · Chinese Nya — 项目文档</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-soft: #161822;
+    --sidebar: #12141d;
+    --border: #262a3a;
+    --text: #d7dae4;
+    --text-dim: #8b90a5;
+    --accent: #ff8fb3;
+    --accent-2: #7dd3fc;
+    --hover: #1d2130;
+    --radius: 14px;
+    --mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- 侧边栏 ---------- */
+  #sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    padding: 28px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    transition: transform .25s ease;
+    z-index: 20;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 10px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .brand .logo {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #c084fc);
+    display: grid; place-items: center;
+    font-size: 22px;
+    box-shadow: 0 4px 18px rgba(255,143,179,.35);
+  }
+  .brand h1 { font-size: 15px; font-weight: 700; letter-spacing: .3px; }
+  .brand p { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  .side-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text-dim); padding: 6px 12px; margin-top: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none; background: transparent;
+    color: var(--text-dim);
+    font-size: 14px; text-align: left;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s ease;
+    margin-bottom: 2px;
+    font-family: inherit;
+  }
+  .nav-item:hover { background: var(--hover); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(255,143,179,.16), rgba(125,211,252,.08));
+    color: var(--accent);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .nav-item .dot { font-size: 15px; width: 20px; text-align: center; }
+  .nav-item .tag {
+    margin-left: auto; font-size: 10px; color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: 99px; padding: 1px 7px;
+  }
+  .side-footer {
+    margin-top: auto; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-dim); line-height: 1.9;
+  }
+  .side-footer a { color: var(--accent-2); text-decoration: none; }
+  .side-footer a:hover { text-decoration: underline; }
+
+  /* ---------- 主内容 ---------- */
+  #main {
+    flex: 1;
+    min-width: 0;
+    padding: 40px 48px 80px;
+    max-width: 920px;
+  }
+  #content h1, #content h2, #content h3 { line-height: 1.4; margin: 1.2em 0 .5em; }
+  #content h1 { font-size: 30px; border-bottom: 1px solid var(--border); padding-bottom: .35em; }
+  #content h2 { font-size: 22px; }
+  #content h3 { font-size: 17px; color: var(--accent-2); }
+  #content p, #content li { line-height: 1.85; color: #c3c7d4; margin: .55em 0; }
+  #content ul, #content ol { padding-left: 1.4em; }
+  #content code {
+    font-family: var(--mono); font-size: .88em;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1px 6px;
+  }
+  #content pre {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    overflow-x: auto; margin: 1em 0;
+  }
+  #content pre code { background: none; border: none; padding: 0; }
+  #content table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14px; }
+  #content th, #content td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+  #content th { background: var(--bg-soft); color: var(--accent); }
+  #content blockquote {
+    border-left: 3px solid var(--accent);
+    background: rgba(255,143,179,.06);
+    padding: 10px 16px; border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1em 0; color: var(--text-dim);
+  }
+  #content a { color: var(--accent-2); }
+  #content details {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 18px; margin: 1em 0;
+  }
+  #content summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+
+  #loading, #error {
+    display: none;
+    text-align: center; padding: 80px 20px; color: var(--text-dim);
+  }
+  .spinner {
+    width: 34px; height: 34px; margin: 0 auto 16px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- 顶部栏（移动端） ---------- */
+  #topbar {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    background: var(--sidebar); border-bottom: 1px solid var(--border);
+    padding: 12px 16px; z-index: 30;
+    align-items: center; gap: 12px;
+  }
+  #topbar .brand h1 { font-size: 14px; }
+  #menuBtn {
+    background: var(--hover); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 15px;
+  }
+  @media (max-width: 860px) {
+    #topbar { display: flex; }
+    #sidebar {
+      position: fixed; top: 0; left: 0; transform: translateX(-100%);
+      padding-top: 70px;
+    }
+    #sidebar.open { transform: translateX(0); box-shadow: 0 0 60px rgba(0,0,0,.6); }
+    #main { padding: 76px 20px 60px; }
+  }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  ::selection { background: rgba(255,143,179,.35); }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button id="menuBtn" aria-label="菜单">☰</button>
+  <div class="brand">
+    <div class="logo">🐱</div>
+    <div><h1>Caelestia · Chinese Nya</h1></div>
+  </div>
+</div>
+
+<aside id="sidebar">
+  <div class="brand">
+    <div class="logo">🐱</div>
+    <div>
+      <h1>Caelestia · Chinese Nya</h1>
+      <p>萌猫语配置 · 项目文档</p>
+    </div>
+  </div>
+  <div class="side-label">项目目录</div>
+  <nav id="nav"></nav>
+  <div class="side-footer">
+    🐱 QQ 群：<a href="https://qm.qq.com/" target="_blank">1126854380</a><br>
+    📺 B站：<a href="https://b23.tv/AdaW44h" target="_blank">b23.tv/AdaW44h</a><br>
+    📧 <a href="mailto:xiaoran_official@hotmail.com">xiaoran_official@hotmail.com</a>
+  </div>
+</aside>
+
+<main id="main">
+  <div id="loading"><div class="spinner"></div>本喵正在加载文档…</div>
+  <div id="error"></div>
+  <article id="content"></article>
+</main>
+
+<script>
+const nav = document.getElementById('nav');
+const content = document.getElementById('content');
+const loading = document.getElementById('loading');
+const errorBox = document.getElementById('error');
+const sidebar = document.getElementById('sidebar');
+
+document.getElementById('menuBtn').onclick = () => sidebar.classList.toggle('open');
+
+async function get(url) {
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(url + ' -> HTTP ' + r.status);
+  return r.text();
+}
+
+async function boot() {
+  loading.style.display = 'block';
+  try {
+    // 读取项目目录清单：每行格式  id|标题|徽标
+    const list = (await get('list.txt'))
+      .split('\n').map(l => l.trim()).filter(Boolean)
+      .map(l => { const [id, title, icon] = l.split('|'); return { id, title, icon: icon || '🐾' }; });
+
+    // 生成侧边栏
+    list.forEach((item, i) => {
+      const b = document.createElement('button');
+      b.className = 'nav-item';
+      b.innerHTML = `<span class="dot">${item.icon}</span><span>${item.title}</span>`;
+      b.onclick = () => { loadDoc(item); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); b.classList.add('active'); sidebar.classList.remove('open'); };
+      nav.appendChild(b);
+      if (i === 0) { b.classList.add('active'); loadDoc(item); }
+    });
+  } catch (e) {
+    loading.style.display = 'none';
+    errorBox.style.display = 'block';
+    errorBox.innerHTML = '⚠ 加载失败：' + e.message + '<br>请确认已开启 GitHub Pages 且 list.txt 存在。';
+  }
+}
+
+async function loadDoc(item) {
+  loading.style.display = 'block';
+  content.innerHTML = '';
+  errorBox.style.display = 'none';
+  try {
+    let md = await get('README/' + item.id + '.md');
+    content.innerHTML = marked.parse(md);
+    // 锚点平滑 & 外链新窗口
+    content.querySelectorAll('a').forEach(a => {
+      if (a.getAttribute('href')?.startsWith('http')) a.target = '_blank';
+    });
+  } catch (e) {
+    content.innerHTML = '';
+    errorBox.style.display = 'block';
+    errorBox.innerHTML = '⚠ 找不到 <code>README/' + item.id + '.md</code>：' + e.message;
+  }
+  loading.style.display = 'none';
+  window.scrollTo({ top: 0 });
+}
+
+boot();
+</script>
+</body>
+</html>
