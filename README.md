@@ -14,6 +14,12 @@
 
 ---
 
+## 🌐 在线文档
+
+📚 **文档站（GitHub Pages）：https://monika-miaomiao.github.io/caelestia-Chinese-Nya/**
+
+简约深色风格、带侧边栏，比本 README 更详细。
+
 ## 📖 目录
 
 - [✨ 特色](#-特色)
