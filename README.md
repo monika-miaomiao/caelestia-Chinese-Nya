@@ -99,6 +99,21 @@ qs -c caelestia kill; caelestia shell -d
 
 打开 Caelestia 的任意菜单（例如启动器或设置），如果文字带有「喵」，就说明安装成功喵！
 
+## ⚡ 快速恢复 / 重装
+
+如果配置损坏或被误删，无需重新克隆仓库，一条命令即可恢复：
+
+```bash
+# 下载并执行（推荐先放到 ~/caelestia-chinese-nya.sh）
+curl -fsSL https://raw.githubusercontent.com/monika-miaomiao/caelestia-Chinese-Nya/main/caelestia-chinese-nya.sh -o ~/caelestia-chinese-nya.sh
+bash ~/caelestia-chinese-nya.sh
+
+# 卸载
+bash ~/caelestia-chinese-nya.sh --uninstall
+```
+
+脚本会自动从 GitHub 拉取最新版并调用 `install.sh`（含自动备份）。
+
 ## 🗑️ 卸载 / 回退
 
 ```bash
@@ -175,9 +190,11 @@ qs -c caelestia kill; caelestia shell -d
 
 衍生自 [caelestia-dots/shell](https://github.com/caelestia-dots/shell)（GPL-3.0-only），本翻译内容同样遵循 GPL-3.0-only。
 
-## 💬 交流
+## 💬 联系
 
 - 🐱 **QQ 群：1126854380**
+- 📺 **B站**：https://b23.tv/AdaW44h
+- 📧 **邮箱**：xiaoran_official@hotmail.com
 - 📮 问题反馈：[GitHub Issues](https://github.com/monika-miaomiao/caelestia-Chinese-Nya/issues)
 - 🌐 上游项目：[caelestia-dots](https://github.com/caelestia-dots)
 
